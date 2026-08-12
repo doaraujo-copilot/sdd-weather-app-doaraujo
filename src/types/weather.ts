@@ -18,6 +18,8 @@ export interface CurrentWeather {
   weatherLabel: string; // Texto legível para a condição climática.
   humidity?: number; // Umidade relativa do ar em porcentagem.
   windSpeed?: number; // Velocidade do vento em km/h, quando disponível.
+  precipitation?: number; // Precipitação acumulada em mm, quando disponível.
+  pressure?: number; // Pressão atmosférica em hPa, quando disponível.
 }
 
 export interface ForecastDay {
@@ -26,6 +28,7 @@ export interface ForecastDay {
   maxTemp: number; // Temperatura máxima do dia em °C ou °F conforme a unidade.
   weatherCode: number; // Código de condição climática do dia.
   weatherLabel: string; // Texto legível da condição climática do dia.
+  precipitationProbability?: number; // Probabilidade de chuva em porcentagem.
 }
 
 export interface WeatherData {
@@ -34,3 +37,67 @@ export interface WeatherData {
   forecast: ForecastDay[]; // Previsão para os próximos 5 dias, incluindo o dia atual.
   unit: Unit; // Unidade ativa da apresentação no momento.
 }
+
+export const mockWeatherData: WeatherData = {
+  city: {
+    id: 3448439,
+    name: 'São Paulo',
+    country: 'Brazil',
+    state: 'São Paulo',
+    latitude: -23.5505,
+    longitude: -46.6333,
+    timezone: 'America/Sao_Paulo',
+  },
+  unit: 'celsius',
+  current: {
+    time: '2026-08-12T14:00:00-03:00',
+    temperature: 27,
+    apparentTemperature: 29,
+    weatherCode: 1,
+    weatherLabel: 'Ensolarado',
+    humidity: 62,
+    windSpeed: 12,
+  },
+  forecast: [
+    {
+      date: '2026-08-12',
+      minTemp: 20,
+      maxTemp: 28,
+      weatherCode: 1,
+      weatherLabel: 'Ensolarado',
+      precipitationProbability: 12,
+    },
+    {
+      date: '2026-08-13',
+      minTemp: 19,
+      maxTemp: 27,
+      weatherCode: 2,
+      weatherLabel: 'Parcialmente nublado',
+      precipitationProbability: 22,
+    },
+    {
+      date: '2026-08-14',
+      minTemp: 18,
+      maxTemp: 25,
+      weatherCode: 3,
+      weatherLabel: 'Nublado',
+      precipitationProbability: 38,
+    },
+    {
+      date: '2026-08-15',
+      minTemp: 17,
+      maxTemp: 24,
+      weatherCode: 61,
+      weatherLabel: 'Possibilidade de chuva',
+      precipitationProbability: 58,
+    },
+    {
+      date: '2026-08-16',
+      minTemp: 18,
+      maxTemp: 26,
+      weatherCode: 1,
+      weatherLabel: 'Ensolarado',
+      precipitationProbability: 10,
+    },
+  ],
+};
