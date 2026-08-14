@@ -3,57 +3,16 @@ import { useState } from 'react';
 import CurrentWeather from './components/CurrentWeather';
 import ForecastList from './components/ForecastList';
 import SearchBar from './components/SearchBar';
-import UnitToggle from './components/UnitToggle';
 import EmptyState from './components/states/EmptyState';
 import ErrorState from './components/states/ErrorState';
 import LoadingState from './components/states/LoadingState';
-import { mockWeatherData, type Unit } from './types/weather';
-
-type ViewState = 'idle' | 'loading' | 'empty' | 'error' | 'success';
-
-const defaultWeather = mockWeatherData;
+import UnitToggle from './components/UnitToggle';
+import { useWeather } from './hooks/useWeather';
+import type { Unit } from './types/weather';
 
 export default function App() {
   const [unit, setUnit] = useState<Unit>('celsius');
-  const [status, setStatus] = useState<ViewState>('success');
-  const [data, setData] = useState(defaultWeather);
-
-  const handleSearch = (city: string) => {
-    const normalized = city.trim().toLowerCase();
-
-    if (!normalized) {
-      setStatus('idle');
-      return;
-    }
-
-    setStatus('loading');
-
-    window.setTimeout(() => {
-      if (normalized.includes('erro') || normalized.includes('falha')) {
-        setStatus('error');
-        return;
-      }
-
-      if (normalized.includes('vazio') || normalized.includes('nenhuma')) {
-        setStatus('empty');
-        return;
-      }
-
-      setData({
-        ...mockWeatherData,
-        city: {
-          ...mockWeatherData.city,
-          name: city.trim(),
-          state: 'São Paulo',
-        },
-      });
-      setStatus('success');
-    }, 600);
-  };
-
-  const handleRetry = () => {
-    setStatus('success');
-  };
+  const { status, data, error, search, retry } = useWeather();
 
   const renderContent = () => {
     switch (status) {
@@ -61,7 +20,9 @@ export default function App() {
         return (
           <div className="rounded-3xl border border-white/10 bg-white/5 p-8 text-center shadow-lg shadow-slate-950/30 backdrop-blur-md">
             <p className="text-2xl font-semibold text-white">Busque uma cidade</p>
-            <p className="mt-2 text-slate-300">Acompanhe o clima atual e a previsão dos próximos dias.</p>
+            <p className="mt-2 text-slate-300">
+              Acompanhe o clima atual e a previsão dos próximos dias.
+            </p>
           </div>
         );
       case 'loading':
@@ -77,18 +38,19 @@ export default function App() {
         return (
           <ErrorState
             title="Não foi possível carregar o clima"
-            message="Verifique sua conexão ou tente novamente em alguns segundos."
-            onRetry={handleRetry}
+            message={error ?? 'Verifique sua conexão ou tente novamente em alguns segundos.'}
+            onRetry={retry}
           />
         );
       case 'success':
-      default:
-        return (
+        return data ? (
           <div className="space-y-6">
             <CurrentWeather city={data.city} current={data.current} unit={unit} />
             <ForecastList forecast={data.forecast} unit={unit} />
           </div>
-        );
+        ) : null;
+      default:
+        return null;
     }
   };
 
@@ -103,14 +65,16 @@ export default function App() {
               </div>
 
               <div>
-                <p className="text-[10px] uppercase tracking-[0.22em] text-slate-400 sm:text-xs">Weather</p>
+                <p className="text-[10px] uppercase tracking-[0.22em] text-slate-400 sm:text-xs">
+                  Weather
+                </p>
                 <h1 className="text-xl font-semibold text-white">Forecast</h1>
               </div>
             </div>
 
             <div className="flex w-full max-w-2xl flex-col gap-3 sm:flex-row sm:items-end sm:justify-end">
               <div className="w-full sm:max-w-xl">
-                <SearchBar onSearch={handleSearch} />
+                <SearchBar onSearch={search} disabled={status === 'loading'} />
               </div>
               <div className="self-start sm:self-auto">
                 <UnitToggle unit={unit} onChange={setUnit} />
