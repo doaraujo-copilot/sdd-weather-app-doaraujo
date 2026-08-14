@@ -114,7 +114,7 @@ function mapForecast(daily: NonNullable<ForecastApiResponse['daily']>): Forecast
     maxTemp: daily.temperature_2m_max[index],
     weatherCode: daily.weather_code[index],
     weatherLabel: getWeatherLabel(daily.weather_code[index]),
-    precipitationProbability: daily.precipitation_probability_max?.[index] ?? undefined,
+    precipitationProbability: daily.precipitation_probability_max?.[index] ?? 0,
   }));
 }
 

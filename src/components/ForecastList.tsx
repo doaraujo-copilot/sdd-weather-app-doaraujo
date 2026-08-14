@@ -33,19 +33,14 @@ const getDayLabel = (dateString: string) => {
 
 export function ForecastList({ forecast, unit }: ForecastListProps) {
   return (
-    <section className="w-full">
+    <section className="w-full" aria-label="Previsão de 5 dias">
       <div className="mb-4 flex items-center justify-between">
         <h3 className="text-lg font-semibold text-white">Próximos dias</h3>
       </div>
 
       <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-5">
         {forecast.map((day) => (
-          <ForecastCard
-            key={day.date}
-            forecast={day}
-            unit={unit}
-            label={getDayLabel(day.date)}
-          />
+          <ForecastCard key={day.date} forecast={day} unit={unit} label={getDayLabel(day.date)} />
         ))}
       </div>
     </section>
