@@ -10,7 +10,10 @@ export function ErrorState({
   onRetry,
 }: ErrorStateProps) {
   return (
-    <div className="flex min-h-[220px] w-full items-center justify-center rounded-3xl border border-red-500/20 bg-red-500/5 p-6 text-center shadow-lg shadow-slate-950/20 backdrop-blur-md">
+    <div
+      role="alert"
+      className="flex min-h-[220px] w-full items-center justify-center rounded-3xl border border-red-500/20 bg-red-500/5 p-6 text-center shadow-lg shadow-slate-950/20 backdrop-blur-md"
+    >
       <div className="flex max-w-md flex-col items-center gap-4 text-slate-100">
         <div className="text-4xl" aria-hidden="true">
           ⚠️

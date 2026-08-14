@@ -13,6 +13,15 @@ export class WeatherServiceError extends Error {
   }
 }
 
+/** Faz o parsing do corpo JSON, convertendo respostas malformadas em WeatherServiceError. */
+async function parseJson<T>(response: Response): Promise<T> {
+  try {
+    return (await response.json()) as T;
+  } catch {
+    throw new WeatherServiceError('Resposta inválida do servidor.');
+  }
+}
+
 /** Dispara um fetch com timeout de 10s, convertendo AbortError e falhas de rede em WeatherServiceError. */
 async function fetchWithTimeout(url: string): Promise<Response> {
   const controller = new AbortController();
@@ -32,8 +41,8 @@ async function fetchWithTimeout(url: string): Promise<Response> {
 
 interface GeocodingApiResult {
   id: number;
-  name: string;
-  country: string;
+  name?: string;
+  country?: string;
   admin1?: string;
   latitude: number;
   longitude: number;
@@ -47,8 +56,8 @@ interface GeocodingApiResponse {
 function mapCity(result: GeocodingApiResult): City {
   return {
     id: result.id,
-    name: result.name,
-    country: result.country,
+    name: result.name ?? 'Cidade desconhecida',
+    country: result.country ?? 'País desconhecido',
     state: result.admin1,
     latitude: result.latitude,
     longitude: result.longitude,
@@ -71,25 +80,25 @@ export async function searchCities(name: string): Promise<City[]> {
     throw new WeatherServiceError('Não foi possível buscar cidades. Tente novamente mais tarde.');
   }
 
-  const data: GeocodingApiResponse = await response.json();
+  const data = await parseJson<GeocodingApiResponse>(response);
   return (data.results ?? []).map(mapCity);
 }
 
 interface ForecastApiResponse {
   current?: {
     time: string;
-    temperature_2m: number;
-    apparent_temperature?: number;
-    relative_humidity_2m?: number;
-    wind_speed_10m?: number;
-    precipitation?: number;
-    weather_code: number;
+    temperature_2m: number | null;
+    apparent_temperature?: number | null;
+    relative_humidity_2m?: number | null;
+    wind_speed_10m?: number | null;
+    precipitation?: number | null;
+    weather_code: number | null;
   };
   daily?: {
     time: string[];
-    temperature_2m_min: number[];
-    temperature_2m_max: number[];
-    weather_code: number[];
+    temperature_2m_min: (number | null)[];
+    temperature_2m_max: (number | null)[];
+    weather_code: (number | null)[];
     precipitation_probability_max?: (number | null)[];
   };
 }
@@ -98,12 +107,12 @@ function mapCurrent(current: NonNullable<ForecastApiResponse['current']>): Curre
   return {
     time: current.time,
     temperature: current.temperature_2m,
-    apparentTemperature: current.apparent_temperature,
+    apparentTemperature: current.apparent_temperature ?? undefined,
     weatherCode: current.weather_code,
     weatherLabel: getWeatherLabel(current.weather_code),
-    humidity: current.relative_humidity_2m,
-    windSpeed: current.wind_speed_10m,
-    precipitation: current.precipitation,
+    humidity: current.relative_humidity_2m ?? undefined,
+    windSpeed: current.wind_speed_10m ?? undefined,
+    precipitation: current.precipitation ?? undefined,
   };
 }
 
@@ -134,7 +143,7 @@ export async function getWeather(city: City): Promise<WeatherData> {
     );
   }
 
-  const data: ForecastApiResponse = await response.json();
+  const data = await parseJson<ForecastApiResponse>(response);
 
   if (!data.current || !data.daily) {
     throw new WeatherServiceError('Resposta incompleta do serviço de clima.');

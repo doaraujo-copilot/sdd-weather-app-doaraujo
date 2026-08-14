@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 
 import CurrentWeather from './components/CurrentWeather';
 import ForecastList from './components/ForecastList';
@@ -12,7 +12,21 @@ import type { Unit } from './types/weather';
 
 export default function App() {
   const [unit, setUnit] = useState<Unit>('celsius');
-  const { status, data, error, search, retry } = useWeather();
+  const { status, data, cities, error, search, selectCity, retry } = useWeather();
+  const resultsRef = useRef<HTMLElement>(null);
+
+  // Move o foco para a região de resultados assim que uma busca termina,
+  // para que usuários de teclado e leitor de tela percebam o novo conteúdo.
+  useEffect(() => {
+    if (
+      status === 'success' ||
+      status === 'empty' ||
+      status === 'error' ||
+      status === 'selecting'
+    ) {
+      resultsRef.current?.focus();
+    }
+  }, [status]);
 
   const renderContent = () => {
     switch (status) {
@@ -33,6 +47,36 @@ export default function App() {
             title="Nenhuma cidade encontrada"
             hint="Tente buscar por outra cidade ou ajuste o termo da pesquisa."
           />
+        );
+      case 'selecting':
+        return (
+          <section
+            aria-label="Selecione uma cidade"
+            className="rounded-3xl border border-white/10 bg-white/5 p-5 shadow-lg shadow-slate-950/30 backdrop-blur-md sm:p-6"
+          >
+            <h2 className="text-lg font-semibold text-white">Encontramos mais de uma cidade</h2>
+            <p className="mt-1 text-sm text-slate-300">
+              Escolha a cidade correta para ver o clima.
+            </p>
+
+            <ul className="mt-4 space-y-2">
+              {cities.map((city) => (
+                <li key={city.id}>
+                  <button
+                    type="button"
+                    onClick={() => selectCity(city)}
+                    className="w-full rounded-2xl border border-white/10 bg-slate-950/20 px-4 py-3 text-left text-slate-100 transition hover:bg-white/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent-400 focus-visible:ring-offset-2 focus-visible:ring-offset-night-900"
+                  >
+                    <span className="font-semibold text-white">{city.name}</span>
+                    <span className="block text-sm text-slate-400">
+                      {city.state ? `${city.state}, ` : ''}
+                      {city.country}
+                    </span>
+                  </button>
+                </li>
+              ))}
+            </ul>
+          </section>
         );
       case 'error':
         return (
@@ -60,14 +104,15 @@ export default function App() {
         <header className="rounded-3xl border border-white/10 bg-white/5 p-4 shadow-glass backdrop-blur-md sm:p-5">
           <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
             <div className="flex items-center gap-3">
-              <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-accent-500/20 text-xl shadow-inner shadow-accent-500/20">
+              <div
+                aria-hidden="true"
+                className="flex h-11 w-11 items-center justify-center rounded-2xl bg-accent-500/20 text-xl shadow-inner shadow-accent-500/20"
+              >
                 ☀️
               </div>
 
               <div>
-                <p className="text-[10px] uppercase tracking-[0.22em] text-slate-400 sm:text-xs">
-                  Weather
-                </p>
+                <p className="text-xs uppercase tracking-[0.22em] text-slate-400">Weather</p>
                 <h1 className="text-xl font-semibold text-white">Forecast</h1>
               </div>
             </div>
@@ -83,7 +128,13 @@ export default function App() {
           </div>
         </header>
 
-        <main className="mt-8" aria-live="polite" aria-busy={status === 'loading'}>
+        <main
+          ref={resultsRef}
+          tabIndex={-1}
+          className="mt-8 focus:outline-none"
+          aria-live="polite"
+          aria-busy={status === 'loading'}
+        >
           {renderContent()}
         </main>
       </div>

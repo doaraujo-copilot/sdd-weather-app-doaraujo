@@ -1,3 +1,5 @@
+import { useMemo } from 'react';
+
 import type { ForecastDay, Unit } from '../types/weather';
 import { ForecastCard } from './ForecastCard';
 
@@ -5,6 +7,9 @@ interface ForecastListProps {
   forecast: ForecastDay[];
   unit: Unit;
 }
+
+// Instância reutilizada para evitar recriar o formatador a cada cálculo de rótulo.
+const weekdayFormatter = new Intl.DateTimeFormat('pt-BR', { weekday: 'short' });
 
 const getDayLabel = (dateString: string) => {
   const date = new Date(dateString);
@@ -28,10 +33,16 @@ const getDayLabel = (dateString: string) => {
     return 'Amanhã';
   }
 
-  return new Intl.DateTimeFormat('pt-BR', { weekday: 'short' }).format(date);
+  return weekdayFormatter.format(date);
 };
 
 export function ForecastList({ forecast, unit }: ForecastListProps) {
+  // Recalcula os rótulos de dia apenas quando a previsão muda, não a cada troca de unidade.
+  const forecastWithLabels = useMemo(
+    () => forecast.map((day) => ({ day, label: getDayLabel(day.date) })),
+    [forecast],
+  );
+
   return (
     <section className="w-full" aria-label="Previsão de 5 dias">
       <div className="mb-4 flex items-center justify-between">
@@ -39,8 +50,8 @@ export function ForecastList({ forecast, unit }: ForecastListProps) {
       </div>
 
       <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-5">
-        {forecast.map((day) => (
-          <ForecastCard key={day.date} forecast={day} unit={unit} label={getDayLabel(day.date)} />
+        {forecastWithLabels.map(({ day, label }) => (
+          <ForecastCard key={day.date} forecast={day} unit={unit} label={label} />
         ))}
       </div>
     </section>

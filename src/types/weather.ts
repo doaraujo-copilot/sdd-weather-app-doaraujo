@@ -12,9 +12,9 @@ export interface City {
 
 export interface CurrentWeather {
   time: string; // Horário UTC da observação atual.
-  temperature: number; // Temperatura atual em °C ou °F conforme a unidade selecionada.
+  temperature: number | null; // Temperatura atual em °C ou °F conforme a unidade selecionada; pode vir null da API.
   apparentTemperature?: number; // Sensação térmica, quando disponível.
-  weatherCode: number; // Código de condição climática da Open-Meteo.
+  weatherCode: number | null; // Código de condição climática da Open-Meteo; pode vir null da API.
   weatherLabel: string; // Texto legível para a condição climática.
   humidity?: number; // Umidade relativa do ar em porcentagem.
   windSpeed?: number; // Velocidade do vento em km/h, quando disponível.
@@ -24,9 +24,9 @@ export interface CurrentWeather {
 
 export interface ForecastDay {
   date: string; // Data do dia da previsão em formato ISO local.
-  minTemp: number; // Temperatura mínima do dia em °C ou °F conforme a unidade.
-  maxTemp: number; // Temperatura máxima do dia em °C ou °F conforme a unidade.
-  weatherCode: number; // Código de condição climática do dia.
+  minTemp: number | null; // Temperatura mínima do dia; pode vir null da API.
+  maxTemp: number | null; // Temperatura máxima do dia; pode vir null da API.
+  weatherCode: number | null; // Código de condição climática do dia; pode vir null da API.
   weatherLabel: string; // Texto legível da condição climática do dia.
   precipitationProbability?: number; // Probabilidade de chuva em porcentagem.
 }

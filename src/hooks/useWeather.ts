@@ -3,7 +3,7 @@ import { useCallback, useRef, useState } from 'react';
 import { getWeather, searchCities, WeatherServiceError } from '../services/weatherService';
 import type { City, WeatherData } from '../types/weather';
 
-export type WeatherStatus = 'idle' | 'loading' | 'success' | 'error' | 'empty';
+export type WeatherStatus = 'idle' | 'loading' | 'success' | 'error' | 'empty' | 'selecting';
 
 interface UseWeatherResult {
   status: WeatherStatus;
@@ -64,7 +64,12 @@ export function useWeather(): UseWeatherResult {
           return;
         }
 
-        await loadCityWeather(results[0]);
+        if (results.length === 1) {
+          await loadCityWeather(results[0]);
+          return;
+        }
+
+        setStatus('selecting');
       } catch (err) {
         setError(resolveErrorMessage(err));
         setStatus('error');

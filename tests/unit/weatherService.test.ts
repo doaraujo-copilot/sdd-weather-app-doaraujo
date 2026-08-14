@@ -82,6 +82,17 @@ describe('searchCities', () => {
 
     await expect(searchCities('Curitiba')).rejects.toBeInstanceOf(WeatherServiceError);
   });
+
+  it('normaliza e codifica caracteres especiais, acentos e espaços extras na URL', async () => {
+    const fetchMock = vi.fn().mockResolvedValue(jsonResponse({ results: [] }));
+    vi.stubGlobal('fetch', fetchMock);
+
+    await searchCities("  São Paulo - Zona Sul d'Oeste  ");
+
+    const requestedUrl = fetchMock.mock.calls[0][0] as string;
+    expect(requestedUrl).toContain(encodeURIComponent("São Paulo - Zona Sul d'Oeste"));
+    expect(requestedUrl).not.toContain('  ');
+  });
 });
 
 describe('getWeather', () => {

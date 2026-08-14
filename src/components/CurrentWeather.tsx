@@ -37,7 +37,11 @@ const weatherIcons: Record<number, string> = {
   99: '⛈️',
 };
 
-const toDisplayTemperature = (value: number, unit: Unit) => {
+const toDisplayTemperature = (value: number | null | undefined, unit: Unit) => {
+  if (value === null || value === undefined || Number.isNaN(value)) {
+    return '—';
+  }
+
   if (unit === 'fahrenheit') {
     return `${Math.round((value * 9) / 5 + 32)}°F`;
   }
@@ -54,7 +58,8 @@ const formatMetric = (value?: number, suffix = '') => {
 };
 
 export function CurrentWeather({ city, current, unit }: CurrentWeatherProps) {
-  const icon = weatherIcons[current.weatherCode] ?? '🌤️';
+  const icon =
+    (current.weatherCode !== null ? weatherIcons[current.weatherCode] : undefined) ?? '🌤️';
 
   return (
     <section
@@ -63,7 +68,9 @@ export function CurrentWeather({ city, current, unit }: CurrentWeatherProps) {
     >
       <div className="flex flex-col gap-6 md:flex-row md:items-center md:justify-between">
         <div className="space-y-2">
-          <p className="text-xs uppercase tracking-[0.2em] text-slate-300 sm:text-sm">Clima agora</p>
+          <p className="text-xs uppercase tracking-[0.2em] text-slate-300 sm:text-sm">
+            Clima agora
+          </p>
           <h2 id="current-weather-title" className="text-2xl font-semibold text-white sm:text-4xl">
             {city.name}
           </h2>
@@ -89,7 +96,7 @@ export function CurrentWeather({ city, current, unit }: CurrentWeatherProps) {
           <span className="text-5xl font-bold tracking-tight text-white sm:text-6xl lg:text-7xl">
             {toDisplayTemperature(current.temperature, unit)}
           </span>
-          <span className="pb-3 text-[10px] uppercase tracking-[0.2em] text-slate-400 sm:text-sm">
+          <span className="pb-3 text-xs uppercase tracking-[0.2em] text-slate-400 sm:text-sm">
             {unit === 'celsius' ? 'Celsius' : 'Fahrenheit'}
           </span>
         </div>
@@ -107,22 +114,30 @@ export function CurrentWeather({ city, current, unit }: CurrentWeatherProps) {
       <div className="mt-8 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
         <div className="rounded-2xl border border-white/10 bg-slate-950/20 p-4">
           <p className="text-xs uppercase tracking-[0.18em] text-slate-400">Umidade</p>
-          <p className="mt-2 text-xl font-semibold text-white">{formatMetric(current.humidity, '%')}</p>
+          <p className="mt-2 text-xl font-semibold text-white">
+            {formatMetric(current.humidity, '%')}
+          </p>
         </div>
 
         <div className="rounded-2xl border border-white/10 bg-slate-950/20 p-4">
           <p className="text-xs uppercase tracking-[0.18em] text-slate-400">Vento</p>
-          <p className="mt-2 text-xl font-semibold text-white">{formatMetric(current.windSpeed, ' km/h')}</p>
+          <p className="mt-2 text-xl font-semibold text-white">
+            {formatMetric(current.windSpeed, ' km/h')}
+          </p>
         </div>
 
         <div className="rounded-2xl border border-white/10 bg-slate-950/20 p-4">
           <p className="text-xs uppercase tracking-[0.18em] text-slate-400">Precipitação</p>
-          <p className="mt-2 text-xl font-semibold text-white">{formatMetric(current.precipitation, ' mm')}</p>
+          <p className="mt-2 text-xl font-semibold text-white">
+            {formatMetric(current.precipitation, ' mm')}
+          </p>
         </div>
 
         <div className="rounded-2xl border border-white/10 bg-slate-950/20 p-4">
           <p className="text-xs uppercase tracking-[0.18em] text-slate-400">Pressão</p>
-          <p className="mt-2 text-xl font-semibold text-white">{formatMetric(current.pressure, ' hPa')}</p>
+          <p className="mt-2 text-xl font-semibold text-white">
+            {formatMetric(current.pressure, ' hPa')}
+          </p>
         </div>
       </div>
     </section>

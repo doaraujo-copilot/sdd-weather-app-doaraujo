@@ -30,6 +30,10 @@ const WEATHER_CODE_LABELS: Record<number, string> = {
   99: 'Trovoadas com granizo forte',
 };
 
-export function getWeatherLabel(weatherCode: number): string {
+export function getWeatherLabel(weatherCode: number | null | undefined): string {
+  if (weatherCode === null || weatherCode === undefined) {
+    return 'Condição não disponível';
+  }
+
   return WEATHER_CODE_LABELS[weatherCode] ?? 'Condição não disponível';
 }

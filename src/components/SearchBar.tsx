@@ -12,6 +12,7 @@ export function SearchBar({
   placeholder = 'Buscar cidade',
 }: SearchBarProps) {
   const [query, setQuery] = useState('');
+  const [showValidation, setShowValidation] = useState(false);
 
   const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -19,9 +20,11 @@ export function SearchBar({
     const trimmedValue = query.trim();
 
     if (!trimmedValue || disabled) {
+      setShowValidation(!trimmedValue);
       return;
     }
 
+    setShowValidation(false);
     onSearch(trimmedValue);
     setQuery('');
   };
@@ -36,10 +39,7 @@ export function SearchBar({
       aria-label="Busca por cidade"
       aria-busy={disabled}
     >
-      <label
-        htmlFor="city-search"
-        className="mb-2 block text-sm font-medium text-slate-200"
-      >
+      <label htmlFor="city-search" className="mb-2 block text-sm font-medium text-slate-200">
         Buscar cidade
       </label>
 
@@ -48,13 +48,19 @@ export function SearchBar({
           id="city-search"
           type="search"
           value={query}
-          onChange={(event) => setQuery(event.target.value)}
+          onChange={(event) => {
+            setQuery(event.target.value);
+            if (showValidation) {
+              setShowValidation(false);
+            }
+          }}
           placeholder={placeholder}
           disabled={disabled}
           autoComplete="off"
           aria-label="Buscar cidade"
           aria-describedby="city-search-help"
-          className="w-full bg-transparent px-3 py-2.5 text-base text-slate-50 placeholder:text-slate-400 focus:border-transparent focus:outline-none disabled:cursor-not-allowed disabled:opacity-60"
+          aria-invalid={showValidation}
+          className="w-full rounded-lg bg-transparent px-3 py-2.5 text-base text-slate-50 placeholder:text-slate-400 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent-400 focus-visible:ring-offset-2 focus-visible:ring-offset-night-900 disabled:cursor-not-allowed disabled:opacity-60"
         />
 
         <button
@@ -69,6 +75,12 @@ export function SearchBar({
       <p id="city-search-help" className="mt-2 text-xs text-slate-400">
         Digite o nome da cidade e pressione Enter para pesquisar.
       </p>
+
+      {showValidation ? (
+        <p role="alert" className="mt-1 text-xs font-medium text-red-300">
+          Digite o nome de uma cidade para buscar.
+        </p>
+      ) : null}
     </form>
   );
 }

@@ -37,4 +37,26 @@ describe('SearchBar', () => {
 
     expect(onSearch).not.toHaveBeenCalled();
   });
+
+  it('exibe mensagem de validação ao tentar enviar busca vazia', () => {
+    const onSearch = vi.fn();
+    render(<SearchBar onSearch={onSearch} />);
+
+    fireEvent.submit(screen.getByRole('search'));
+
+    expect(screen.getByRole('alert')).toHaveTextContent('Digite o nome de uma cidade para buscar.');
+  });
+
+  it('remove a mensagem de validação ao digitar novamente', () => {
+    const onSearch = vi.fn();
+    render(<SearchBar onSearch={onSearch} />);
+
+    fireEvent.submit(screen.getByRole('search'));
+    expect(screen.getByRole('alert')).toBeInTheDocument();
+
+    const input = screen.getByLabelText('Buscar cidade');
+    fireEvent.change(input, { target: { value: 'Curitiba' } });
+
+    expect(screen.queryByRole('alert')).not.toBeInTheDocument();
+  });
 });
